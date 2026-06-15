@@ -1,62 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test</title>
+<style>
+    body {
+        margin: 0;
+        width: 100vw;
+        height: 100vh;
 
-    <style>
-        body {
-            margin: 0;
-            background: #000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+        display: flex;
+        justify-content: center;
+        align-items: center;
 
-        .character {
-            width: 290px; /* Width of one frame */
-            height: 260px; /* Height of one frame */
+        background: #000;
+        overflow: hidden;
+    }
 
-            background-image: url("axolotl.png");
-            background-repeat: no-repeat;
+    .character {
+        width: 290px; /* Width of one frame */
+        height: 260px; /* Height of one frame */
+
+        background-image: url("axolotl.png");
+        background-repeat: no-repeat;
+        background-position: 0 0;
+
+        cursor: pointer;
+    }
+
+    .play {
+        animation: spriteAnim 0.56s steps(7) 1;
+    }
+
+    @keyframes spriteAnim {
+        from {
             background-position: 0 0;
-
-            cursor: pointer;
         }
-
-        .play {
-            animation: spriteAnim 0.56s steps(7) 1;
+        to {
+            background-position: -2030px 0;
         }
-
-        @keyframes spriteAnim {
-            from {
-                background-position: 0 0;
-            }
-            to {
-                background-position: -2030px 0; /* 290 × 7 frames */
-            }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="character" id="character"></div>
-
-    <script>
-        const character = document.getElementById("character");
-
-        character.addEventListener("click", () => {
-            character.classList.remove("play");
-            void character.offsetWidth; // restart animation
-            character.classList.add("play");
-        });
-
-        character.addEventListener("animationend", () => {
-            character.classList.remove("play"); // return to first frame
-        });
-    </script>
-
-</body>
-</html>
+    }
+</style>
