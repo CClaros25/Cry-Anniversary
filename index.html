@@ -1,38 +1,144 @@
-<style>
-    body {
-        margin: 0;
-        width: 100vw;
-        height: 100vh;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axolotl Anniversary</title>
+    <style>
+        body {
+            margin: 0;
+            width: 100vw;
+            height: 100vh;
 
-        display: flex;
-        justify-content: center;
-        align-items: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
 
-        background: #000;
-        overflow: hidden;
-    }
+            background: #000;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
 
-    .character {
-        width: 290px; /* Width of one frame */
-        height: 260px; /* Height of one frame */
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
 
-        background-image: url("axolotl.png");
-        background-repeat: no-repeat;
-        background-position: 0 0;
+        .character {
+            width: 290px; /* Width of one frame */
+            height: 260px; /* Height of one frame */
 
-        cursor: pointer;
-    }
-
-    .play {
-        animation: spriteAnim 0.56s steps(7) 1;
-    }
-
-    @keyframes spriteAnim {
-        from {
+            background-image: url("axolotl.png");
+            background-repeat: no-repeat;
             background-position: 0 0;
+
+            cursor: pointer;
+            transition: transform 0.1s;
         }
-        to {
-            background-position: -2030px 0;
+
+        .character:active {
+            transform: scale(0.95);
         }
-    }
-</style>
+
+        .play {
+            animation: spriteAnim 0.56s steps(7) 1;
+        }
+
+        @keyframes spriteAnim {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: -2030px 0;
+            }
+        }
+
+        .progress-bar-container {
+            width: 300px;
+            height: 30px;
+            background-color: #333;
+            border: 2px solid #666;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ff00, #00aa00);
+            transition: width 0.05s linear;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .progress-text {
+            color: #fff;
+            font-size: 14px;
+            margin-top: 10px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="character" id="axolotl"></div>
+        <div>
+            <div class="progress-bar-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            <div class="progress-text" id="progressText">Click the axolotl!</div>
+        </div>
+    </div>
+
+    <script>
+        const axolotl = document.getElementById('axolotl');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        let progress = 0;
+        const maxProgress = 100;
+        const fillRate = 5; // How much progress fills per frame when pressing
+        const drainRate = 1; // How much progress drains per frame when not pressing
+
+        let isPressed = false;
+
+        // Mouse events
+        axolotl.addEventListener('mousedown', () => {
+            isPressed = true;
+            axolotl.classList.add('play');
+        });
+
+        document.addEventListener('mouseup', () => {
+            isPressed = false;
+        });
+
+        // Touch events for mobile
+        axolotl.addEventListener('touchstart', () => {
+            isPressed = true;
+            axolotl.classList.add('play');
+        });
+
+        document.addEventListener('touchend', () => {
+            isPressed = false;
+        });
+
+        // Animation loop
+        function update() {
+            if (isPressed) {
+                progress = Math.min(progress + fillRate, maxProgress);
+            } else {
+                progress = Math.max(progress - drainRate, 0);
+            }
+
+            progressBar.style.width = progress + '%';
+            progressText.textContent = Math.round(progress) + '%';
+
+            requestAnimationFrame(update);
+        }
+
+        update();
+    </script>
+</body>
+</html>
