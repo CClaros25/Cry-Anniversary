@@ -68,9 +68,9 @@
         .progress-bar {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #00ff00, #00aa00);
+            background: linear-gradient(90deg, #ff1493, #ff69b4);
             transition: width 0.05s linear;
-            box-shadow: 0 0 10px #00ff00;
+            box-shadow: 0 0 10px #ff1493;
         }
 
         .progress-text {
@@ -78,6 +78,33 @@
             font-size: 14px;
             margin-top: 10px;
             opacity: 0.7;
+        }
+
+        .difficulty-indicator {
+            color: #fff;
+            font-size: 12px;
+            margin-top: 5px;
+            opacity: 0.5;
+        }
+
+        @keyframes heartFloat {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(var(--tx));
+                opacity: 0;
+            }
+        }
+
+        .heart-burst {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            font-size: 60px;
+            pointer-events: none;
+            animation: heartFloat 2s ease-out forwards;
         }
     </style>
 </head>
@@ -89,6 +116,7 @@
                 <div class="progress-bar" id="progressBar"></div>
             </div>
             <div class="progress-text" id="progressText">Click the axolotl!</div>
+            <div class="difficulty-indicator" id="difficultyText"></div>
         </div>
     </div>
 
@@ -96,11 +124,12 @@
         const axolotl = document.getElementById('axolotl');
         const progressBar = document.getElementById('progressBar');
         const progressText = document.getElementById('progressText');
+        const difficultyText = document.getElementById('difficultyText');
 
         let progress = 0;
         const maxProgress = 100;
-        const fillRate = 5; // How much progress fills per frame when pressing
-        const drainRate = 1; // How much progress drains per frame when not pressing
+        let baseRillRate = 5;
+        const baseDrainRate = 1;
 
         let isPressed = false;
 
@@ -124,16 +153,74 @@
             isPressed = false;
         });
 
+        function getDynamicDifficulty() {
+            // Difficulty increases as progress approaches 100
+            // At 0%: fillRate = 5, drainRate = 1
+            // At 50%: fillRate = 3, drainRate = 2
+            // At 90%: fillRate = 1, drainRate = 3
+            // At 100%: Can't progress further
+            
+            const difficulty = progress / 100;
+            const fillRate = Math.max(1, baseRillRate - (difficulty * 4));
+            const drainRate = Math.min(4, baseDrainRate + (difficulty * 3));
+            
+            return { fillRate, drainRate };
+        }
+
+        function updateDifficultyText() {
+            if (progress < 25) {
+                difficultyText.textContent = '🟢 Easy';
+            } else if (progress < 50) {
+                difficultyText.textContent = '🟡 Medium';
+            } else if (progress < 75) {
+                difficultyText.textContent = '🟠 Hard';
+            } else {
+                difficultyText.textContent = '🔴 Extreme';
+            }
+        }
+
+        function createHeartBurst() {
+            // Create multiple hearts that float upward
+            for (let i = 0; i < 15; i++) {
+                const heart = document.createElement('div');
+                heart.classList.add('heart-burst');
+                heart.textContent = '❤️';
+                heart.style.setProperty('--tx', (Math.random() - 0.5) * 200 + 'px');
+                heart.style.left = (50 + (Math.random() - 0.5) * 100) + 'vw';
+                document.body.appendChild(heart);
+                
+                setTimeout(() => heart.remove(), 2000);
+            }
+        }
+
+        function triggerCelebration() {
+            // Create heart burst effect
+            createHeartBurst();
+            
+            // After hearts animation, redirect to celebration page
+            setTimeout(() => {
+                window.location.href = 'celebration.html';
+            }, 1000);
+        }
+
         // Animation loop
         function update() {
-            if (isPressed) {
+            const { fillRate, drainRate } = getDynamicDifficulty();
+
+            if (isPressed && progress < maxProgress) {
                 progress = Math.min(progress + fillRate, maxProgress);
-            } else {
+            } else if (!isPressed) {
                 progress = Math.max(progress - drainRate, 0);
             }
 
             progressBar.style.width = progress + '%';
             progressText.textContent = Math.round(progress) + '%';
+            updateDifficultyText();
+
+            // Check if progress reached 100%
+            if (progress >= maxProgress) {
+                triggerCelebration();
+            }
 
             requestAnimationFrame(update);
         }
